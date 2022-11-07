@@ -17,13 +17,13 @@
             admin
           </div>
           <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-            <li class="nav-item">
+            <li class="nav-item" data-bs-dismiss="offcanvas">
               <router-link  class="nav-link" :to="{name:'topo_index'}">拓扑管理</router-link> 
             </li>
-            <li class="nav-item">
+            <li class="nav-item" data-bs-dismiss="offcanvas">
                 <router-link  class="nav-link" :to="{name:'flow_index'}" >流规则管理</router-link> 
             </li>
-            <li class="nav-item">
+            <li class="nav-item" data-bs-dismiss="offcanvas">
                 <router-link  class="nav-link" :to="{name:'internet_index'}" >网络管理</router-link> 
             </li>
           </ul>
