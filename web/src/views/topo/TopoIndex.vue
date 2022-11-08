@@ -148,7 +148,9 @@
       <button type="button" class="btn btn-success">确定</button>
     </div>
   </div>
-
+  <div class="row">
+    <router-link :to="{name:'login_index'}" class="nav-link logout"> 退出登录</router-link>
+  </div>
 </div>
 
 </template>
@@ -161,6 +163,7 @@ import { ref } from 'vue';
         model_change.value = index;
         console.log(model_change.value);
       }
+      
       return{
         model_change,
         modelchange,
@@ -170,6 +173,17 @@ import { ref } from 'vue';
 
 </script>
 <style scoped>
+.logout{
+  margin-top: 200px;
+  margin-left: 1250px;
+  width: 180px;
+  height: 55px;
+  background-color: rgb(189,49,36);
+  font-family: 楷体;
+  font-size: 35px;
+  text-align: center;
+  color: aliceblue;
+}
 div.row{
     padding-top: 100px;
     height: 75px;
