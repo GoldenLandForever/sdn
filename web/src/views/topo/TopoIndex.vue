@@ -1,10 +1,9 @@
-
 <template>
 
     <div class="container">
   <div class="row align-items-start">
     <div class="col">
-      <button type="button" class="btn btn-danger" @click="modelchange(1)">现有网络拓扑视图</button>
+      <button type="button" class="btn btn-danger" @click="modelchange(1)" >现有网络拓扑视图</button>
     </div>
     <div class="col">
       <button type="button" class="btn btn-danger" @click="modelchange(2)">导入文件生成拓扑</button>
@@ -12,7 +11,22 @@
     <div class="col">
       <button type="button" class="btn btn-primary" @click="modelchange(3)">建立拓扑</button>
     </div>
-    <div class="col-5"></div>
+    <div class="col-5">
+      <div class="myGround">
+      <div class="row">
+        <div class="col-8">
+          <button id="but2" class="btn btn-primary xuuxxi" @click="addSwitch">添加交换机</button>
+          <div class="alert alert-primary" role="alert" style="margin-left: 20px">
+            {{linkInfo}}
+          </div>
+          <button id="but3" class="btn btn-primary xuuxxi" @click="addLink">确定</button>
+        </div>
+      </div>
+      <div class="row">
+          <div id="main" style=" height: 600px;"></div>
+        </div>
+    </div>
+    </div>
   </div>
   <div class="row align-items-center">
     <div class="col">
@@ -36,7 +50,8 @@
     <div class="col">
       <button type="button" class="btn btn-danger" @click="modelchange(9)">删除交换机</button>
     </div>
-    <div class="col-5"></div>
+    <div class="col-5">
+    </div>
   </div>
   
   <div class="row" >
@@ -148,28 +163,164 @@
       <button type="button" class="btn btn-success">确定</button>
     </div>
   </div>
+
   <div class="row">
     <router-link :to="{name:'login_index'}" class="nav-link logout"> 退出登录</router-link>
   </div>
 </div>
 
+
 </template>
 <script>
-import { ref } from 'vue';
+import { onMounted } from "vue";
+  import * as echarts from 'echarts';
+  import { ref } from 'vue';
   export default{
     setup() {
       let model_change = ref(1);
       const modelchange = (index) =>{
+        if(index == 4) addHost();
+        if(index == 5)
         model_change.value = index;
         console.log(model_change.value);
       }
-      
-      return{
+      const idMap = {};
+      let mapCnt = 0;
+      let curHost = 0;
+      let curSwitch = 0;
+  
+      let myChart;
+  
+      const data = [];
+      const edges = [];
+      let allOption = new Array();
+  
+      let link1, link2;
+      let linkInfo = ref('links ' + link1 + ' & ' + link2);
+  
+      let option = {
+        series: [
+          {
+            type: 'graph',
+            layout: 'force',
+            animation: false,
+            roam: true,
+            label: {
+              show: true
+            },
+            data: data,
+            force: {
+              // initLayout: 'circular'
+              // gravity: 0
+              repulsion: 100,
+              edgeLength: 100
+            },
+            edges: edges
+          }
+        ]
+      };
+  
+      onMounted(() => {
+        let myChart1 = echarts.init(document.getElementById("main"));
+        myChart1.setOption(option);
+  
+        myChart = myChart1;
+  
+        myChart.on('click', function (param) {
+          if (param.dataType === 'node') {
+            if (link1 === null) link1 = param.data.name;
+            else if (link2 === null) link2 = param.data.name;
+            else link1 = link2 = null;
+  
+            linkInfo.value = 'links ' + link1 + ' & ' + link2;
+          }
+        })
+      })
+  
+      const chk = () => {
+        console.log(allOption);
+      }
+  
+      const addHost = () => {
+        idMap['h' + curHost] = mapCnt++;
+        allOption.push('h' + curHost);
+  
+        data.push({
+          id: data.length + '',
+          symbolSize: 40,
+          draggable: true,
+          name: 'h' + curHost++
+        });
+  
+        myChart.setOption({
+          series: [
+            {
+              roam: true,
+              data: data,
+              edges: edges
+            }
+          ]
+        });
+      }
+  
+      const addSwitch = () => {
+        idMap['s' + curSwitch] = mapCnt++;
+        allOption.push('s' + curSwitch);
+  
+        data.push({
+          id: data.length + '',
+          symbolSize: 40,
+          draggable: true,
+          name: 's' + curSwitch++
+        });
+  
+        myChart.setOption({
+          series: [
+            {
+              roam: true,
+              data: data,
+              edges: edges
+            }
+          ]
+        });
+      }
+  
+      const addLink = () => {
+        let pos1 = idMap[link1];
+        let pos2 = idMap[link2];
+  
+        if (pos1 != null && pos2 != null && pos1 != pos2) {
+          edges.push({
+            source: pos1,
+            target: pos2
+          });
+  
+          link1 = link2 = null;
+        }
+  
+        myChart.setOption({
+          series: [
+            {
+              roam: true,
+              data: data,
+              edges: edges
+            }
+          ]
+        });
+      }
+  
+      return {
+        addHost,
+        addSwitch,
+        addLink,
+        chk,
+        allOption,
+        linkInfo,
         model_change,
         modelchange,
       }
     }
-  }
+}
 
 </script>
 <style scoped>
@@ -221,4 +372,17 @@ div.row{
   width: 100px;
   height: 50px;
 }
+div.myGround {
+    border-radius: 2%;
+    width: 500px;
+    height: 500px;
+    background-color:aliceblue;
+  }
+  .xuuxxi {
+    font-weight: 400;
+    font-size: 15px;
+    font-family: 楷体;
+    width: 100px;
+    height: 50px;
+  }
 </style>
