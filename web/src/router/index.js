@@ -5,6 +5,11 @@ import INTERNET from '../views/internet/InternetIndex'
 import Login from '../views/login/LoginIndex'
 const routes = [
   {
+    path: "/",
+    name: "home",
+    redirect: "/topo",
+  },
+  {
     path:"/topo",
     component:TOPO,
     name:"topo_index",

@@ -13,18 +13,7 @@
     </div>
     <div class="col-5">
       <div class="myGround">
-      <div class="row">
-        <div class="col-8">
-          <button id="but2" class="btn btn-primary xuuxxi" @click="addSwitch">添加交换机</button>
-          <div class="alert alert-primary" role="alert" style="margin-left: 20px">
-            {{linkInfo}}
-          </div>
-          <button id="but3" class="btn btn-primary xuuxxi" @click="addLink">确定</button>
-        </div>
-      </div>
-      <div class="row">
-          <div id="main" style=" height: 600px;"></div>
-        </div>
+          <div id="main" style="margin-top: 0%; height: 500px;"></div>
     </div>
     </div>
   </div>
@@ -89,45 +78,50 @@
     以下为model4
    -->
     <div class="OperationBody" v-if="model_change == 4">
+      <form @submit.prevent="addHost">
       <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">请输入要添加的主机名</span>
-        <input type="text" class="form-control" placeholder="例如:h1" aria-label="Username" aria-describedby="basic-addon1">
+        <input v-model="hostname" type="text" class="form-control" placeholder="例如:h1" aria-label="Username" aria-describedby="basic-addon1">
       </div>
       <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">请输入ip</span>
-        <input type="text" class="form-control" placeholder="例如:192.168.3.9" aria-label="Username" aria-describedby="basic-addon1">
+        <input v-model="ipname" type="text" class="form-control" placeholder="例如:192.168.3.9" aria-label="Username" aria-describedby="basic-addon1">
       </div>
       <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">请输入默认连接的交换机</span>
-        <input type="text" class="form-control" placeholder="例如:S1" aria-label="Username" aria-describedby="basic-addon1">
+        <input v-model="switchname" type="text" class="form-control" placeholder="例如:S1" aria-label="Username" aria-describedby="basic-addon1">
       </div>
-      <button type="button" class="btn btn-success">确定</button>
+      <button type="submit" class="btn btn-success">确定</button>
+    </form>
     </div>
-
     <!-- 
       以下为model5
       -->
+    <form @submit.prevent="addLink">
       <div class="OperationBody" v-if="model_change == 5">
       <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">请输入要添加的主机（交换机）名</span>
-        <input type="text" class="form-control" placeholder="例如:h1" aria-label="Username" aria-describedby="basic-addon1">
+        <input v-model="link1" type="text" class="form-control" placeholder="例如:h1" aria-label="Username" aria-describedby="basic-addon1">
       </div>
       <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">请输入与之连接的要添加的主机（交换机）名</span>
-        <input type="text" class="form-control" placeholder="例如:S2" aria-label="Username" aria-describedby="basic-addon1">
+        <input v-model="link2" type="text" class="form-control" placeholder="例如:S2" aria-label="Username" aria-describedby="basic-addon1">
       </div>
-      <button type="button" class="btn btn-success">确定</button>
+      <button type="submit" class="btn btn-success">确定</button>
     </div>
+  </form>
     <!-- 
       以下为model6
       -->
+    <form @submit.prevent="addSwitch">
       <div class="OperationBody" v-if="model_change == 6">
-      <div class="input-group mb-3">
-        <span class="input-group-text" id="basic-addon1">请输入要添加的交换机名</span>
-        <input type="text" class="form-control" placeholder="例如:S1" aria-label="Username" aria-describedby="basic-addon1">
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="basic-addon1">请输入要添加的交换机名</span>
+          <input v-model="switchname" type="text" class="form-control" placeholder="例如:S1" aria-label="Username" aria-describedby="basic-addon1">
+        </div>
+        <button type="submit" class="btn btn-success">确定</button>
       </div>
-      <button type="button" class="btn btn-success">确定</button>
-    </div>
+    </form>
       <!-- 
       以下为model7
       -->
@@ -179,24 +173,23 @@ import { onMounted } from "vue";
     setup() {
       let model_change = ref(1);
       const modelchange = (index) =>{
-        if(index == 4) addHost();
-        if(index == 5)
         model_change.value = index;
         console.log(model_change.value);
       }
+      let hostname = ref('');
+      // let ipname = ref('');
+      let switchname = ref('');
       const idMap = {};
       let mapCnt = 0;
-      let curHost = 0;
-      let curSwitch = 0;
-  
+      
       let myChart;
   
       const data = [];
       const edges = [];
       let allOption = new Array();
   
-      let link1, link2;
-      let linkInfo = ref('links ' + link1 + ' & ' + link2);
+      let link1 = ref(''), link2 = ref('');
+      let linkInfo = ref('links ' + link1.value + ' & ' + link2.value);
   
       let option = {
         series: [
@@ -228,11 +221,11 @@ import { onMounted } from "vue";
   
         myChart.on('click', function (param) {
           if (param.dataType === 'node') {
-            if (link1 === null) link1 = param.data.name;
-            else if (link2 === null) link2 = param.data.name;
+            if (link1.value === null) link1.value = param.data.name;
+            else if (link2.value === null) link2.value = param.data.name;
             else link1 = link2 = null;
   
-            linkInfo.value = 'links ' + link1 + ' & ' + link2;
+            linkInfo.value = 'links ' + link1.value + ' & ' + link2.value;
           }
         })
       })
@@ -242,14 +235,14 @@ import { onMounted } from "vue";
       }
   
       const addHost = () => {
-        idMap['h' + curHost] = mapCnt++;
-        allOption.push('h' + curHost);
+        idMap[hostname.value] = mapCnt++;
+        allOption.push(hostname.value);
   
         data.push({
           id: data.length + '',
           symbolSize: 40,
           draggable: true,
-          name: 'h' + curHost++
+          name: hostname.value
         });
   
         myChart.setOption({
@@ -264,16 +257,16 @@ import { onMounted } from "vue";
       }
   
       const addSwitch = () => {
-        idMap['s' + curSwitch] = mapCnt++;
-        allOption.push('s' + curSwitch);
+        idMap[switchname.value] = mapCnt++;
+        allOption.push(switchname.value);
   
         data.push({
           id: data.length + '',
           symbolSize: 40,
           draggable: true,
-          name: 's' + curSwitch++
+          name: switchname.value
         });
-  
+
         myChart.setOption({
           series: [
             {
@@ -283,21 +276,23 @@ import { onMounted } from "vue";
             }
           ]
         });
+
+        switchname.value = '';
       }
   
       const addLink = () => {
-        let pos1 = idMap[link1];
-        let pos2 = idMap[link2];
-  
+        let pos1 = idMap[link1.value];
+        let pos2 = idMap[link2.value];
+        
         if (pos1 != null && pos2 != null && pos1 != pos2) {
           edges.push({
             source: pos1,
             target: pos2
           });
   
-          link1 = link2 = null;
+          link1.value = link2.value = null;
         }
-  
+
         myChart.setOption({
           series: [
             {
@@ -310,6 +305,10 @@ import { onMounted } from "vue";
       }
   
       return {
+        hostname,
+        link1,
+        link2,
+        switchname,
         addHost,
         addSwitch,
         addLink,
