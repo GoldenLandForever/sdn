@@ -125,27 +125,31 @@
       <!-- 
       以下为model7
       -->
-      <div class="OperationBody" v-if="model_change == 7">
-      <div class="input-group mb-3">
-        <span class="input-group-text" id="basic-addon1">请输入要删除的主机</span>
-        <input type="text" class="form-control" placeholder="例如:h1" aria-label="Username" aria-describedby="basic-addon1">
+    <form @submit.prevent="subhost">
+        <div class="OperationBody" v-if="model_change == 7">
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="basic-addon1">请输入要删除的主机</span>
+          <input v-model="hostname" type="text" class="form-control" placeholder="例如:h1" aria-label="Username" aria-describedby="basic-addon1">
+        </div>
+        <button type="submit" class="btn btn-success">确定</button>
       </div>
-      <button type="button" class="btn btn-success">确定</button>
-    </div>
+    </form>
       <!-- 
       以下为model8
       -->
+      <form @submit.prevent="rmLink">
       <div class="OperationBody" v-if="model_change == 8">
       <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">请输入要删除的主机（交换机）名</span>
-        <input type="text" class="form-control" placeholder="例如:h1" aria-label="Username" aria-describedby="basic-addon1">
+        <input v-model="link1" type="text" class="form-control" placeholder="例如:h1" aria-label="Username" aria-describedby="basic-addon1">
       </div>
       <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">请输入与之连接的要删除的主机（交换机）名</span>
-        <input type="text" class="form-control" placeholder="例如:S2" aria-label="Username" aria-describedby="basic-addon1">
+        <input v-model="link2" type="text" class="form-control" placeholder="例如:S2" aria-label="Username" aria-describedby="basic-addon1">
       </div>
-      <button type="button" class="btn btn-success">确定</button>
+      <button type="submit" class="btn btn-success">确定</button>
     </div>
+  </form>
       <!-- 
       以下为model9
       -->
@@ -167,25 +171,21 @@
 </template>
 <script>
 import { onMounted } from "vue";
-  import * as echarts from 'echarts';
-  import { ref } from 'vue';
+import * as echarts from 'echarts';
+import { ref } from 'vue';
+import store from "@/store";
   export default{
     setup() {
       let model_change = ref(1);
       const modelchange = (index) =>{
         model_change.value = index;
-        console.log(model_change.value);
       }
       let hostname = ref('');
       // let ipname = ref('');
       let switchname = ref('');
-      const idMap = {};
-      let mapCnt = 0;
       
       let myChart;
   
-      const data = [];
-      const edges = [];
       let allOption = new Array();
   
       let link1 = ref(''), link2 = ref('');
@@ -201,14 +201,14 @@ import { onMounted } from "vue";
             label: {
               show: true
             },
-            data: data,
+            data: store.state.topo.data,
             force: {
               // initLayout: 'circular'
               // gravity: 0
               repulsion: 100,
               edgeLength: 100
             },
-            edges: edges
+            edges: store.state.topo.edges
           }
         ]
       };
@@ -235,57 +235,107 @@ import { onMounted } from "vue";
       }
   
       const addHost = () => {
-        idMap[hostname.value] = mapCnt++;
+        for (let index = 0; index < store.state.topo.hostname.length; index++) {
+          const element = store.state.topo.hostname[index];
+          if(element == hostname.value) return
+        }
+        store.state.topo.hostname.push(hostname.value);
+        store.state.topo.idMap[hostname.value] = store.state.topo.mapCnt++;
         allOption.push(hostname.value);
-  
-        data.push({
-          id: data.length + '',
+        
+        store.state.topo.data.push({
+          id: store.state.topo.mapCnt + '',
           symbolSize: 40,
           draggable: true,
-          name: hostname.value
-        });
-  
-        myChart.setOption({
-          series: [
-            {
-              roam: true,
-              data: data,
-              edges: edges
-            }
-          ]
-        });
-      }
-  
-      const addSwitch = () => {
-        idMap[switchname.value] = mapCnt++;
-        allOption.push(switchname.value);
-  
-        data.push({
-          id: data.length + '',
-          symbolSize: 40,
-          draggable: true,
-          name: switchname.value
+          name: hostname.value,
+          symbol: 'image://' + require('../../assets/2.png'),
+          label: {
+            position: 'bottom',
+            formatter: '{b}'
+          },
         });
 
         myChart.setOption({
           series: [
             {
               roam: true,
-              data: data,
-              edges: edges
+              data: store.state.topo.data,
+              edges: store.state.topo.edges
+            }
+          ]
+        });
+        hostname.value = '';
+      }
+      
+      const subhost = () => {
+        for (let index = 0; index < store.state.topo.mapCnt; index++) {
+          if(store.state.topo.data[index].name == hostname.value){
+            store.state.topo.data[index].symbolSize = 0;
+            store.state.topo.data[index].name = '';
+          }
+        }
+
+        let newEdges = [];
+        for (var i in store.state.topo.edges) {
+          if(store.state.topo.edges[i]["source"] == store.state.topo.idMap[hostname.value]  ||  store.state.topo.edges[i]["target"] == store.state.topo.idMap[hostname.value]) continue;
+
+          newEdges.push(store.state.topo.edges[i]);
+        }
+        store.state.topo.edges = newEdges;
+        myChart.setOption({
+          series: [
+            {
+              roam: true,
+              data: store.state.topo.data,
+              edges: store.state.topo.edges
+            }
+          ]
+        });
+        
+        hostname.value = '';
+      }
+
+      const addSwitch = () => {
+        for (let index = 0; index < store.state.topo.hostname.length; index++) {
+          const element = store.state.topo.hostname[index];
+          if(element == switchname.value) return
+        }
+        store.state.topo.hostname.push(switchname.value);
+        store.state.topo.idMap[switchname.value] = store.state.topo.mapCnt++;
+        allOption.push(switchname.value);
+  
+        store.state.topo.data.push({
+          id: store.state.topo.mapCnt + '',
+          symbolSize: 40,
+          draggable: true,
+          name: switchname.value,
+          symbol: 'image://' + require('../../assets/1.png'),
+          label: {
+            position: 'bottom',
+            formatter: '{b}'
+          },
+        });
+
+
+        myChart.setOption({
+          series: [
+            {
+              roam: true,
+              data: store.state.topo.data,
+              edges: store.state.topo.edges
             }
           ]
         });
 
         switchname.value = '';
       }
-  
+      
       const addLink = () => {
-        let pos1 = idMap[link1.value];
-        let pos2 = idMap[link2.value];
-        
+        let pos1 = store.state.topo.idMap[link1.value];
+        let pos2 = store.state.topo.idMap[link2.value];
+        console.log("pos1:" + pos1 + "  pos2:" + pos2 );
         if (pos1 != null && pos2 != null && pos1 != pos2) {
-          edges.push({
+          store.state.topo.edges.push({
             source: pos1,
             target: pos2
           });
@@ -297,22 +347,50 @@ import { onMounted } from "vue";
           series: [
             {
               roam: true,
-              data: data,
-              edges: edges
+              data: store.state.topo.data,
+              edges: store.state.topo.edges
             }
           ]
         });
       }
-  
+
+      const rmLink = () => {
+      let pos1 = store.state.topo.idMap[link1.value];
+      let pos2 = store.state.topo.idMap[link2.value];
+
+      let newEdges = [];
+
+      for (var i in store.state.topo.edges) {
+        if((store.state.topo.edges[i]["source"] == pos1 && store.state.topo.edges[i]["target"] == pos2) || (store.state.topo.edges[i]["source"] == pos2 && store.state.topo.edges[i]["target"] == pos1)) continue;
+
+        newEdges.push(store.state.topo.edges[i]);
+      }
+
+      store.state.topo.edges = newEdges;
+
+      link1.value = '';
+      link2.value = '';
+      myChart.setOption({
+        series: [
+          {
+            roam: true,
+            data: store.state.topo.data,
+            edges: store.state.topo.edges
+          }
+        ]
+      });
+    }
       return {
         hostname,
         link1,
         link2,
         switchname,
+        subhost,
         addHost,
         addSwitch,
         addLink,
         chk,
+        rmLink,
         allOption,
         linkInfo,
         model_change,
