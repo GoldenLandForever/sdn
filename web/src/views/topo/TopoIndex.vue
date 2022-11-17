@@ -174,11 +174,16 @@ import { onMounted } from "vue";
 import * as echarts from 'echarts';
 import { ref } from 'vue';
 import store from "@/store";
+// import $ from 'jquery';
+
   export default{
     setup() {
       let model_change = ref(1);
       const modelchange = (index) =>{
         model_change.value = index;
+        if(model_change.value == 3){
+          getTopo();
+        }
       }
       let hostname = ref('');
       // let ipname = ref('');
@@ -233,7 +238,40 @@ import store from "@/store";
       const chk = () => {
         console.log(allOption);
       }
-  
+      const getTopo = () => {
+        for (let index = 1; index <= 5; index++) {
+            hostname.value = 'h' + index;
+            addHost();
+        }
+        hostname.value = '';
+        for (let index = 1; index <= 3; index++) {
+            switchname.value = 's' + index;
+            addSwitch();
+        }
+        switchname.value = '';
+        link1.value = 'h2';
+        link2.value = 's2';
+        addLink();
+        link1.value = 'h3';
+        link2.value = 's2';
+        addLink();
+        link1.value = 's1';
+        link2.value = 's2';
+        addLink();
+        link1.value = 's1';
+        link2.value = 'h1';
+        addLink();
+        link1.value = 's1';
+        link2.value = 's3';
+        addLink();
+        link2.value = 's3';
+        link1.value = 'h5';
+        addLink();
+        link2.value = 's3';
+        link1.value = 'h4';
+        addLink();
+      }
+
       const addHost = () => {
         for (let index = 0; index < store.state.topo.hostname.length; index++) {
           const element = store.state.topo.hostname[index];
@@ -264,6 +302,12 @@ import store from "@/store";
             }
           ]
         });
+        if(switchname.value != ''){
+          link1.value = switchname.value;
+          link2.value = hostname.value;
+          addLink();
+          switchname.value = '';
+        }
         hostname.value = '';
       }
       
@@ -385,6 +429,7 @@ import store from "@/store";
         link1,
         link2,
         switchname,
+        getTopo,
         subhost,
         addHost,
         addSwitch,
