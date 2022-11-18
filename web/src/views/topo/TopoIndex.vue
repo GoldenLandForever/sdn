@@ -153,14 +153,17 @@
       <!-- 
       以下为model9
       -->
-      <div class="OperationBody" v-if="model_change == 9">
-      <div class="input-group mb-3">
-        <span class="input-group-text" id="basic-addon1">请输入要删除的交换机名</span>
-        <input type="text" class="form-control" placeholder="例如:S1" aria-label="Username" aria-describedby="basic-addon1">
-      </div>
-      <button type="button" class="btn btn-success">确定</button>
-    </div>
+      <form @submit.prevent="subSwitch">
+        <div class="OperationBody" v-if="model_change == 9">
+          <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">请输入要删除的交换机名</span>
+            <input v-model="switchname" type="text" class="form-control" placeholder="例如:S1" aria-label="Username" aria-describedby="basic-addon1">
+          </div>
+          <button type="submit" class="btn btn-success">确定</button>
+         </div>
+      </form>
   </div>
+  
 
   <div class="row">
     <router-link :to="{name:'login_index'}" class="nav-link logout"> 退出登录</router-link>
@@ -174,7 +177,7 @@ import { onMounted } from "vue";
 import * as echarts from 'echarts';
 import { ref } from 'vue';
 import store from "@/store";
-// import $ from 'jquery';
+// import $ from 'jquery'; 
 
   export default{
     setup() {
@@ -318,7 +321,12 @@ import store from "@/store";
             store.state.topo.data[index].name = '';
           }
         }
-
+        for (let index = 0; index < store.state.topo.hostname.length; index++) {
+          const element = store.state.topo.hostname[index];
+          if(element == hostname.value){
+            store.state.topo.hostname[index] = '';
+          }
+        }
         let newEdges = [];
         for (var i in store.state.topo.edges) {
           if(store.state.topo.edges[i]["source"] == store.state.topo.idMap[hostname.value]  ||  store.state.topo.edges[i]["target"] == store.state.topo.idMap[hostname.value]) continue;
@@ -340,11 +348,11 @@ import store from "@/store";
       }
 
       const addSwitch = () => {
-        for (let index = 0; index < store.state.topo.hostname.length; index++) {
-          const element = store.state.topo.hostname[index];
+        for (let index = 0; index < store.state.topo.switchname.length; index++) {
+          const element = store.state.topo.switchname[index];
           if(element == switchname.value) return
         }
-        store.state.topo.hostname.push(switchname.value);
+        store.state.topo.switchname.push(switchname.value);
         store.state.topo.idMap[switchname.value] = store.state.topo.mapCnt++;
         allOption.push(switchname.value);
   
@@ -374,6 +382,39 @@ import store from "@/store";
         switchname.value = '';
       }
       
+      const subSwitch = () => {
+        for (let index = 0; index < store.state.topo.mapCnt; index++) {
+          if(store.state.topo.data[index].name == switchname.value){
+            store.state.topo.data[index].symbolSize = 0;
+            store.state.topo.data[index].name = '';
+          }
+        }
+
+        for (let index = 0; index < store.state.topo.switchname.length; index++) {
+          const element = store.state.topo.switchname[index];
+          if(element == switchname.value){
+            store.state.topo.switchname[index] = '';
+          }
+        }
+        let newEdges = [];
+        for (var i in store.state.topo.edges) {
+          if(store.state.topo.edges[i]["source"] == store.state.topo.idMap[switchname.value]  ||  store.state.topo.edges[i]["target"] == store.state.topo.idMap[switchname.value]) continue;
+          newEdges.push(store.state.topo.edges[i]);
+        }
+        store.state.topo.edges = newEdges;
+        myChart.setOption({
+          series: [
+            {
+              roam: true,
+              data: store.state.topo.data,
+              edges: store.state.topo.edges
+            }
+          ]
+        });
+        
+        switchname.value = '';
+      }
+
       const addLink = () => {
         let pos1 = store.state.topo.idMap[link1.value];
         let pos2 = store.state.topo.idMap[link2.value];
@@ -436,6 +477,7 @@ import store from "@/store";
         addLink,
         chk,
         rmLink,
+        subSwitch,
         allOption,
         linkInfo,
         model_change,
