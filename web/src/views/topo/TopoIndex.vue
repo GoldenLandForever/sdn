@@ -177,7 +177,7 @@ import { onMounted } from "vue";
 import * as echarts from 'echarts';
 import { ref } from 'vue';
 import store from "@/store";
-// import $ from 'jquery'; 
+import $ from 'jquery'; 
 
   export default{
     setup() {
@@ -189,7 +189,7 @@ import store from "@/store";
         }
       }
       let hostname = ref('');
-      // let ipname = ref('');
+      let ipname = ref('');
       let switchname = ref('');
       
       let myChart;
@@ -238,10 +238,23 @@ import store from "@/store";
         })
       })
   
-      const chk = () => {
-        console.log(allOption);
-      }
+      var chk = 0;
       const getTopo = () => {
+        chk = 1;
+        $.ajax({
+            url: "http://127.0.0.1:5000/topo/default-topo",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            contentType: "application/json", //必须这样写POST   还要加JSON.stringify()    
+            success: function (data) {
+                console.log(data.param);
+            },
+            error: function (text) {
+                console.log(text);
+                return;
+            }
+        });
         for (let index = 1; index <= 5; index++) {
             hostname.value = 'h' + index;
             addHost();
@@ -273,12 +286,36 @@ import store from "@/store";
         link2.value = 's3';
         link1.value = 'h4';
         addLink();
+
+        chk = 0;
       }
 
       const addHost = () => {
         for (let index = 0; index < store.state.topo.hostname.length; index++) {
           const element = store.state.topo.hostname[index];
           if(element == hostname.value) return
+        }
+        var  hostname_json = {
+          'name':hostname.value,
+          'ip_address':ipname.value,
+          'switch':switchname.value
+        }
+        if(chk != 1){
+          $.ajax({
+              url: "http://127.0.0.1:5000/topo/addhost",
+              type: "POST",
+              data: JSON.stringify(hostname_json),
+              dataType: "json",
+              async: false,
+              contentType: "application/json", //必须这样写POST   还要加JSON.stringify()    
+              success: function (data) {
+                  console.log(data.param);
+              },
+              error: function (text) {
+                  console.log(text);
+                  return;
+              }
+          });
         }
         store.state.topo.hostname.push(hostname.value);
         store.state.topo.idMap[hostname.value] = store.state.topo.mapCnt++;
@@ -311,10 +348,25 @@ import store from "@/store";
           addLink();
           switchname.value = '';
         }
+        ipname.value = '';
         hostname.value = '';
       }
       
       const subhost = () => {
+          $.ajax({
+              url: "http://127.0.0.1:5000/topo/deletehost/" + hostname.value,
+              type: "GET",
+              dataType: "json",
+              async: false,
+              contentType: "application/json", //必须这样写POST   还要加JSON.stringify()    
+              success: function (data) {
+                  console.log(data.param);
+              },
+              error: function (text) {
+                  console.log(text);
+                  return;
+              }
+          });
         for (let index = 0; index < store.state.topo.mapCnt; index++) {
           if(store.state.topo.data[index].name == hostname.value){
             store.state.topo.data[index].symbolSize = 0;
@@ -352,6 +404,20 @@ import store from "@/store";
           const element = store.state.topo.switchname[index];
           if(element == switchname.value) return
         }
+        $.ajax({
+              url: "http://127.0.0.1:5000/topo/addswitch/" + switchname.value,
+              type: "GET",
+              dataType: "json",
+              async: false,
+              contentType: "application/json", //必须这样写POST   还要加JSON.stringify()    
+              success: function (data) {
+                  console.log(data.param);
+              },
+              error: function (text) {
+                  console.log(text);
+                  return;
+              }
+          });
         store.state.topo.switchname.push(switchname.value);
         store.state.topo.idMap[switchname.value] = store.state.topo.mapCnt++;
         allOption.push(switchname.value);
@@ -383,6 +449,20 @@ import store from "@/store";
       }
       
       const subSwitch = () => {
+        $.ajax({
+              url: "http://127.0.0.1:5000/topo/deleteswitch/" + switchname.value,
+              type: "GET",
+              dataType: "json",
+              async: false,
+              contentType: "application/json", //必须这样写POST   还要加JSON.stringify()    
+              success: function (data) {
+                  console.log(data.param);
+              },
+              error: function (text) {
+                  console.log(text);
+                  return;
+              }
+          });
         for (let index = 0; index < store.state.topo.mapCnt; index++) {
           if(store.state.topo.data[index].name == switchname.value){
             store.state.topo.data[index].symbolSize = 0;
@@ -416,9 +496,29 @@ import store from "@/store";
       }
 
       const addLink = () => {
+        var  Link_json = {
+          'node1': link1.value,
+          'node2': link2.value,
+        }
+        if(chk != 1){
+          $.ajax({
+              url: "http://127.0.0.1:5000/topo/addlink",
+              type: "POST",
+              data: JSON.stringify(Link_json),
+              dataType: "json",
+              async: false,
+              contentType: "application/json", //必须这样写POST   还要加JSON.stringify()    
+              success: function (data) {
+                  console.log(data.param);
+              },
+              error: function (text) {
+                  console.log(text);
+                  return;
+              }
+          });
+        }
         let pos1 = store.state.topo.idMap[link1.value];
         let pos2 = store.state.topo.idMap[link2.value];
-        console.log("pos1:" + pos1 + "  pos2:" + pos2 );
         if (pos1 != null && pos2 != null && pos1 != pos2) {
           store.state.topo.edges.push({
             source: pos1,
@@ -440,6 +540,27 @@ import store from "@/store";
       }
 
       const rmLink = () => {
+        var  Link_json = {
+          'node1': link1.value,
+          'node2': link2.value,
+        }
+        if(chk != 1){
+          $.ajax({
+              url: "http://127.0.0.1:5000/topo/deletelink",
+              type: "POST",
+              data: JSON.stringify(Link_json),
+              dataType: "json",
+              async: false,
+              contentType: "application/json", //必须这样写POST   还要加JSON.stringify()    
+              success: function (data) {
+                  console.log(data.param);
+              },
+              error: function (text) {
+                  console.log(text);
+                  return;
+              }
+          });
+        }
       let pos1 = store.state.topo.idMap[link1.value];
       let pos2 = store.state.topo.idMap[link2.value];
 
@@ -466,6 +587,7 @@ import store from "@/store";
       });
     }
       return {
+        ipname,
         hostname,
         link1,
         link2,
@@ -475,7 +597,6 @@ import store from "@/store";
         addHost,
         addSwitch,
         addLink,
-        chk,
         rmLink,
         subSwitch,
         allOption,
