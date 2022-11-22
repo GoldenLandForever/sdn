@@ -97,8 +97,9 @@
     <!-- 
       以下为model5
       -->
-    <form @submit.prevent="addLink">
+
       <div class="OperationBody" v-if="model_change == 5">
+        <form @submit.prevent="addLink">
       <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">请输入要添加的主机（交换机）名</span>
         <input v-model="link1" type="text" class="form-control" placeholder="例如:h1" aria-label="Username" aria-describedby="basic-addon1">
@@ -108,37 +109,43 @@
         <input v-model="link2" type="text" class="form-control" placeholder="例如:S2" aria-label="Username" aria-describedby="basic-addon1">
       </div>
       <button type="submit" class="btn btn-success">确定</button>
+    </form>
     </div>
-  </form>
+
     <!-- 
       以下为model6
       -->
-    <form @submit.prevent="addSwitch">
+    
       <div class="OperationBody" v-if="model_change == 6">
-        <div class="input-group mb-3">
-          <span class="input-group-text" id="basic-addon1">请输入要添加的交换机名</span>
-          <input v-model="switchname" type="text" class="form-control" placeholder="例如:S1" aria-label="Username" aria-describedby="basic-addon1">
-        </div>
-        <button type="submit" class="btn btn-success">确定</button>
+        <form @submit.prevent="addSwitch">
+          <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">请输入要添加的交换机名</span>
+            <input v-model="switchname" type="text" class="form-control" placeholder="例如:S1" aria-label="Username" aria-describedby="basic-addon1">
+          </div>
+          <button type="submit" class="btn btn-success">确定</button>
+        </form>
       </div>
-    </form>
+
       <!-- 
       以下为model7
       -->
-    <form @submit.prevent="subhost">
+
         <div class="OperationBody" v-if="model_change == 7">
+          <form @submit.prevent="subhost">
         <div class="input-group mb-3">
           <span class="input-group-text" id="basic-addon1">请输入要删除的主机</span>
           <input v-model="hostname" type="text" class="form-control" placeholder="例如:h1" aria-label="Username" aria-describedby="basic-addon1">
         </div>
         <button type="submit" class="btn btn-success">确定</button>
+      </form>
       </div>
-    </form>
+
       <!-- 
       以下为model8
       -->
-      <form @submit.prevent="rmLink">
+
       <div class="OperationBody" v-if="model_change == 8">
+        <form @submit.prevent="rmLink">
       <div class="input-group mb-3">
         <span class="input-group-text" id="basic-addon1">请输入要删除的主机（交换机）名</span>
         <input v-model="link1" type="text" class="form-control" placeholder="例如:h1" aria-label="Username" aria-describedby="basic-addon1">
@@ -148,20 +155,23 @@
         <input v-model="link2" type="text" class="form-control" placeholder="例如:S2" aria-label="Username" aria-describedby="basic-addon1">
       </div>
       <button type="submit" class="btn btn-success">确定</button>
+    </form>
     </div>
-  </form>
+
       <!-- 
       以下为model9
       -->
-      <form @submit.prevent="subSwitch">
+
         <div class="OperationBody" v-if="model_change == 9">
+          <form @submit.prevent="subSwitch">
           <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1">请输入要删除的交换机名</span>
             <input v-model="switchname" type="text" class="form-control" placeholder="例如:S1" aria-label="Username" aria-describedby="basic-addon1">
           </div>
           <button type="submit" class="btn btn-success">确定</button>
+        </form>
          </div>
-      </form>
+
   </div>
   
 
@@ -197,7 +207,6 @@ import $ from 'jquery';
       let allOption = new Array();
   
       let link1 = ref(''), link2 = ref('');
-      let linkInfo = ref('links ' + link1.value + ' & ' + link2.value);
   
       let option = {
         series: [
@@ -226,20 +235,12 @@ import $ from 'jquery';
         myChart1.setOption(option);
   
         myChart = myChart1;
-  
-        myChart.on('click', function (param) {
-          if (param.dataType === 'node') {
-            if (link1.value === null) link1.value = param.data.name;
-            else if (link2.value === null) link2.value = param.data.name;
-            else link1 = link2 = null;
-  
-            linkInfo.value = 'links ' + link1.value + ' & ' + link2.value;
-          }
-        })
+
       })
   
       var chk = 0;
       const getTopo = () => {
+
         chk = 1;
         $.ajax({
             url: "http://127.0.0.1:5000/topo/default-topo",
@@ -600,7 +601,6 @@ import $ from 'jquery';
         rmLink,
         subSwitch,
         allOption,
-        linkInfo,
         model_change,
         modelchange,
       }
@@ -662,12 +662,5 @@ div.myGround {
     width: 500px;
     height: 500px;
     background-color:aliceblue;
-  }
-  .xuuxxi {
-    font-weight: 400;
-    font-size: 15px;
-    font-family: 楷体;
-    width: 100px;
-    height: 50px;
-  }
+}
 </style>

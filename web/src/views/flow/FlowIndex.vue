@@ -10,7 +10,11 @@
     <div class="col">
       <button type="button" class="btn btn-danger" @click="modelchange(3)">添加流表项</button>
     </div>
-    <div class="col-5"></div>
+    <div class="col-5">
+      <div class="myGround">
+          <div  id="main" style="margin-top: 0%; height: 500px;"></div>
+        </div>
+    </div>
   </div>
   <div class="row align-items-center">
     <div class="col">
@@ -103,10 +107,39 @@
 </div>
 </template>
 <script>
-    import { ref } from 'vue';
+import { onMounted } from "vue";
+import * as echarts from 'echarts';
+import store from "@/store";
+import { ref } from 'vue';
   export default{
     setup() {
       let model_change = ref(1);
+      let option = {
+        series: [
+          {
+            type: 'graph',
+            layout: 'force',
+            animation: false,
+            roam: true,
+            label: {
+              show: true
+            },
+            data: store.state.topo.data,
+            force: {
+              // initLayout: 'circular'
+              // gravity: 0
+              repulsion: 100,
+              edgeLength: 100
+            },
+            edges: store.state.topo.edges
+          }
+        ]
+      };
+      onMounted(() => {
+        let myChart1 = echarts.init(document.getElementById("main"));
+        myChart1.setOption(option);
+  
+      })
       const modelchange = (index) =>{
         model_change.value = index;
         console.log(model_change.value);
@@ -169,6 +202,12 @@ div.row{
 }
 .btncantsee{
     visibility: hidden !important;
+}
+div.myGround {
+    border-radius: 2%;
+    width: 500px;
+    height: 500px;
+    background-color:aliceblue;
 }
 
 </style>

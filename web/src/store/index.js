@@ -1,5 +1,6 @@
 import { createStore } from 'vuex'
 import ModuleTopo from './topo'
+import ModuleInternet from './Internet'
 export default createStore({
   state: {
   },
@@ -10,6 +11,7 @@ export default createStore({
   actions: {
   },
   modules: {
+    internet:ModuleInternet,
     topo:ModuleTopo
   }
 })
