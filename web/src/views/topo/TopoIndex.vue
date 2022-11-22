@@ -242,6 +242,12 @@ import $ from 'jquery';
       const getTopo = () => {
 
         chk = 1;
+        store.state.topo.idMap = {};
+        store.state.topo.mapCnt = 0;
+        store.state.topo.hostname = [];
+        store.state.topo.switchname = [];
+        store.state.topo.edges = [];
+        store.state.topo.data = [];
         $.ajax({
             url: "http://127.0.0.1:5000/topo/default-topo",
             type: "GET",

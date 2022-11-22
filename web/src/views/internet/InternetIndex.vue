@@ -17,7 +17,7 @@
         </div>
         <div class="result">
             <text class="result1">链路时延:</text>
-            <text class="result2">{{$store.state.internet.text3}}</text>
+            <text class="result2">{{$store.state.internet.text3}}ms</text>
         </div>
           <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1">请输入要测试的主机名1</span>
@@ -89,7 +89,7 @@ import $ from 'jquery';
         }
         console.log(store.state.internet.text1);
         $.ajax({
-            url: "http://127.0.0.1:5000/net/linkStatues",
+            url: "http://127.0.0.1:5000/net/linkStatus",
             type: "POST",
             data: JSON.stringify(hostname_json),
             dataType: "json",
