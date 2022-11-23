@@ -28,6 +28,7 @@
             <span class="input-group-text" id="basic-addon1">请输入要测试的主机名2</span>
             <input v-model="hostname2" type="text" class="form-control" placeholder="例如:h3" aria-label="Username" aria-describedby="basic-addon1">
           </div>
+          <button type="button" class="btn btn-primary" @click="pingall">pingall</button>
           <button type="submit" class="btn btn-success">进行测量</button>
         </div>
       </form>
@@ -73,6 +74,19 @@ import $ from 'jquery';
           }
         ]
       };
+      const pingall = () => {
+        $.ajax({
+            url: "http://127.0.0.1:5000/net/pingall",
+            type: "GET",
+            async: false,
+            success: function (data) {
+                console.log(data);
+            },
+            error: function (text) {
+                console.log(text);
+            }
+        });
+      }
       const ping = () => {
         var flag = 0;
         for (let index = 0; index < store.state.topo.hostname.length; index++) {
@@ -120,6 +134,7 @@ import $ from 'jquery';
         option,
         onMounted,
         ping,
+        pingall
       }
     }
   }
@@ -152,8 +167,15 @@ div.row{
   padding-top: 15px;
 }
 .btn-success{
+  margin-left: 25px;
   font-size: 20px;
-  margin-left: 500px;
+  width: 120px;
+  height: 50px;
+  font-family: 楷体;
+}
+.btn-primary{
+  font-size: 20px;
+  margin-left: 400px;
   width: 120px;
   height: 50px;
   font-family: 楷体;
@@ -209,4 +231,5 @@ div.myGround {
   top: 185px;
   left: 450px;
 }
+
 </style>

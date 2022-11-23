@@ -9,7 +9,7 @@
       <button type="button" class="btn btn-danger" @click="modelchange(2)">导入文件生成拓扑</button>
     </div>
     <div class="col">
-      <button type="button" class="btn btn-primary" @click="modelchange(3)">建立拓扑</button>
+      <button type="button" class="btn btn-primary" @click="modelchange(3)">建立默认拓扑</button>
     </div>
     <div class="col-5">
       <div class="myGround">
@@ -64,14 +64,14 @@
         <input type="file" class="form-control" id="inputGroupFile02">
         <label class="input-group-text" for="inputGroupFile02">Upload</label>
         </div>
-      <button type="button" class="btn btn-success">提交</button>
+      <button type="button" class="btn btn-success" @click="getTopo()">提交</button>
     </div>
    <!-- 
     以下为model3
    -->
    <div class="OperationBody" v-if="model_change == 3">
         <div class="result">
-            这个好难
+            建立拓扑成功
         </div>
     </div>
     <!-- 
@@ -298,6 +298,7 @@ import $ from 'jquery';
       }
 
       const addHost = () => {
+        if(hostname.value == '') return;
         for (let index = 0; index < store.state.topo.hostname.length; index++) {
           const element = store.state.topo.hostname[index];
           if(element == hostname.value) return
@@ -407,6 +408,7 @@ import $ from 'jquery';
       }
 
       const addSwitch = () => {
+        if(switchname.value == '') return;
         for (let index = 0; index < store.state.topo.switchname.length; index++) {
           const element = store.state.topo.switchname[index];
           if(element == switchname.value) return

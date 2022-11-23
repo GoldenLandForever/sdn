@@ -43,32 +43,47 @@
         以下为model2
      -->
     <div class="OperationBody" v-if="model_change == 2">
+        <div v-if="showdata == 0">
+          <button v-for="index in $store.state.topo.switchname" :key="index" type="button" class="btn btn-info" @click="showflow(index)">{{index}}</button>
+        </div>
+        <div v-if="showdata == 1" >
+          <div class="indexname">{{indexname}}中有{{cnt}}条流表</div>
+          <div style="width: 700px;height: 200px;overflow-x:hidden;">
+          <div v-for="(data,index) in datas" :key="data">
+            <div class="flow_title">第{{index}}条流表</div>
+            <div class="flow_content">{{data}}</div>
+          </div>            
+        </div>
+        </div>
         <div class="result">
-            dpid
-        </div>
-        <div>
-            <button type="button" class="btn btn-info">dpid1</button>
-        </div>
-        <div>
-            <button type="button" class="btn btn-info">dpid2</button>
-        </div>
-        <div class="result">
-            当前拓扑共有:2台交换机
+            当前拓扑共有:{{$store.state.topo.switchname.length}}台交换机
         </div>
       <button type="button" class="btn btn-success">刷新</button>
-      <button type="button" class="btn btn-success">返回</button>
+      <button type="button" class="btn btn-success" @click="back">返回</button>
     </div>
     <!-- 
         以下为model3
      -->
      <div class="OperationBody" v-if="model_change == 3">
-        <div class="result">
-            dpid
+        <form @submit.prevent="addflow">
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="basic-addon1">switchname</span>
+          <input v-model="switchname" type="text" class="form-control" placeholder="例如:s1" aria-label="Username" aria-describedby="basic-addon1">
         </div>
-        <div class="input-group input-group-lg">
-          <input type="text" placeholder="请以json形式输入流表..." class="form-control text_input" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-lg">
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="basic-addon1">priority</span>
+          <input v-model="priority" type="text" class="form-control" placeholder="例如:1" aria-label="Username" aria-describedby="basic-addon1">
         </div>
-      <button type="button" class="btn btn-success">提交</button>
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="basic-addon1">match</span>
+          <input v-model="match" type="text" class="form-control" placeholder="" aria-label="Username" aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="basic-addon1">actions</span>
+          <input v-model="actions" type="text" class="form-control" placeholder="" aria-label="Username" aria-describedby="basic-addon1">
+        </div>
+        <button type="submit" class="btn btn-success">提交</button>
+      </form>
     </div>
      <!-- 
         以下为model4
@@ -87,17 +102,11 @@
         以下为model5
      -->
      <div class="OperationBody" v-if="model_change == 5">
-        <div class="result">
-            dpid
-        </div>
-        <div>
-            <button type="button" class="btn btn-info">dpid1</button>
-        </div>
-        <div>
-            <button type="button" class="btn btn-info">dpid2</button>
+      <div >
+          <button v-for="index in $store.state.topo.switchname" :key="index" type="button" class="btn btn-danger btn-delete" @click="deleteflow(index)">{{index}}</button>
         </div>
         <div class="result">
-            当前拓扑共有:2台交换机
+            当前拓扑共有:{{$store.state.topo.switchname.length}}台交换机
         </div>
       <button type="button" class="btn btn-success">刷新</button>
       <button type="button" class="btn btn-success">返回</button>
@@ -110,9 +119,18 @@ import { onMounted } from "vue";
 import * as echarts from 'echarts';
 import store from "@/store";
 import { ref } from 'vue';
+import $ from 'jquery';
   export default{
     setup() {
+      let switchname = ref('');
+      let priority = ref();
+      let match = ref('');
+      let actions = ref('');
       let model_change = ref(1);
+      let showdata = ref(0);
+      let indexname = ref('');
+      let cnt = 0;
+      let datas = [];
       let option = {
         series: [
           {
@@ -134,6 +152,68 @@ import { ref } from 'vue';
           }
         ]
       };
+      const back = () =>{
+        showdata.value = 0;
+      }
+      const deleteflow = (index) => {
+        $.ajax({
+              url: "http://127.0.0.1:5000/delete/flow/" + index,
+              type: "POST",
+              async: false,
+              success: function (data) {
+                console.log(data);
+              },
+              error: function (text) {
+                  console.log(text);
+                  return;
+              }
+          });
+      }
+      const showflow = (index) => {
+        $.ajax({
+              url: "http://127.0.0.1:5000/get/switch/" + index,
+              type: "GET",
+              async: false,
+              success: function (data) {
+                console.log(data);
+                for(let i in data){
+                  datas[i] = data[i];
+                }
+
+                // console.log(datas[0]);
+              },
+              error: function (text) {
+                  console.log(text);
+                  return;
+              }
+          });
+        indexname.value = index;
+        showdata.value = 1;
+        
+      }
+      const addflow = () => {
+        var  flow_json = {
+          'switchname':switchname.value,
+          'priority':priority.value,
+          'match':match.value,
+          'actions':actions.value
+        }
+        $.ajax({
+              url: "http://127.0.0.1:5000/add/flow",
+              type: "POST",
+              data: JSON.stringify(flow_json),
+              dataType: "json",
+              async: false,
+              contentType: "application/json", //必须这样写POST   还要加JSON.stringify()    
+              success: function (data) {
+                  console.log(data);
+              },
+              error: function (text) {
+                  console.log(text);
+                  return;
+              }
+          });
+      }
       onMounted(() => {
         let myChart1 = echarts.init(document.getElementById("main"));
         myChart1.setOption(option);
@@ -144,8 +224,20 @@ import { ref } from 'vue';
         console.log(model_change.value);
       }
       return{
+        switchname,
+        match,
+        priority,
+        actions,
         model_change,
         modelchange,
+        addflow,
+        showflow,
+        showdata,
+        datas,
+        indexname,
+        back,
+        cnt,
+        deleteflow,
       }
     }
   }
@@ -176,14 +268,19 @@ div.row{
   background-color: aliceblue;
   border-color: rgb(254,252,177);
   width: 715px;
-  height: 300px;
+  height: 400px;
   border-radius: 5px;
   border-style:solid;
 }
 .input-group{
-  padding-top: 25px;
+  padding-top: 5px;
 }
 .btn-info{
+    margin: 5px;
+    width: 200px;
+    height: 50px;
+}
+.btn-delete{
     margin: 5px;
     width: 200px;
     height: 50px;
@@ -211,5 +308,17 @@ div.myGround {
 .text_input{
   height: 150px;
   width: 400px; 
+}
+.indexname{
+  font-size: 25px;
+  font-weight: 400;
+  font-family: 楷体;
+}
+.flow_title{
+  font-weight: 600;
+  background-color:azure;
+}
+.flow_content{
+  background-color:beige;
 }
 </style>
