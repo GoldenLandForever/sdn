@@ -44,7 +44,7 @@
      -->
     <div class="OperationBody" v-if="model_change == 2">
         <div class="result">
-            dpid(点击dpid可查看交换机流表(好丑，待定))
+            dpid
         </div>
         <div>
             <button type="button" class="btn btn-info">dpid1</button>
@@ -65,9 +65,8 @@
         <div class="result">
             dpid
         </div>
-        <div class="input-group mb-3">
-        <input type="file" class="form-control" id="inputGroupFile02">
-        <label class="input-group-text" for="inputGroupFile02">Upload</label>
+        <div class="input-group input-group-lg">
+          <input type="text" placeholder="请以json形式输入流表..." class="form-control text_input" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-lg">
         </div>
       <button type="button" class="btn btn-success">提交</button>
     </div>
@@ -89,7 +88,7 @@
      -->
      <div class="OperationBody" v-if="model_change == 5">
         <div class="result">
-            dpid(点击dpid即可删除交换机流表中的所有流表(好丑，待定))
+            dpid
         </div>
         <div>
             <button type="button" class="btn btn-info">dpid1</button>
@@ -209,5 +208,8 @@ div.myGround {
     height: 500px;
     background-color:aliceblue;
 }
-
+.text_input{
+  height: 150px;
+  width: 400px; 
+}
 </style>

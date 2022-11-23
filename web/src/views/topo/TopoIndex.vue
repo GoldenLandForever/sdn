@@ -411,6 +411,7 @@ import $ from 'jquery';
           const element = store.state.topo.switchname[index];
           if(element == switchname.value) return
         }
+        if(chk != 1){
         $.ajax({
               url: "http://127.0.0.1:5000/topo/addswitch/" + switchname.value,
               type: "GET",
@@ -425,6 +426,7 @@ import $ from 'jquery';
                   return;
               }
           });
+        }
         store.state.topo.switchname.push(switchname.value);
         store.state.topo.idMap[switchname.value] = store.state.topo.mapCnt++;
         allOption.push(switchname.value);
