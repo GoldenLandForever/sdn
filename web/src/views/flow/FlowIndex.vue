@@ -58,7 +58,7 @@
         <div class="result">
             当前拓扑共有:{{$store.state.topo.switchname.length}}台交换机
         </div>
-      <button type="button" class="btn btn-success">刷新</button>
+      <button type="button" class="btn btn-success" @click="flushflow">刷新</button>
       <button type="button" class="btn btn-success" @click="back">返回</button>
     </div>
     <!-- 
@@ -155,6 +155,9 @@ import $ from 'jquery';
       const back = () =>{
         showdata.value = 0;
       }
+      const flushflow = () => {
+        showdata.value = 0;
+      }
       const deleteflow = (index) => {
         $.ajax({
               url: "http://127.0.0.1:5000/delete/flow/" + index,
@@ -199,8 +202,9 @@ import $ from 'jquery';
           // var flow_json = {};
           reader.readAsBinaryString(e.target.files[0])
           reader.onload = ev => {
-            console.log(ev.target.result);
+            console.log(typeof(ev.target.result));
             flow_json2 = ev.target.result;
+            console.log(typeof(flow_json2));
         }
       }
       const fileflow = () => {
@@ -271,7 +275,8 @@ import $ from 'jquery';
         cnt,
         deleteflow,
         getFiles,
-        fileflow
+        fileflow,
+        flushflow
       }
     },
     methods: {
