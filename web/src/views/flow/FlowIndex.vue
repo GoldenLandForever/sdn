@@ -50,7 +50,7 @@
           <div class="indexname">{{indexname}}中有{{cnt}}条流表</div>
           <div style="width: 700px;height: 200px;overflow-x:hidden;">
           <div v-for="(data,index) in datas" :key="data">
-            <div class="flow_title">第{{index}}条流表</div>
+            <div class="flow_title">第{{index + 1}}条流表</div>
             <div class="flow_content">{{data}}</div>
           </div>            
         </div>
@@ -93,10 +93,10 @@
             请上传JSON文件
         </div>
         <div class="input-group mb-3">
-        <input type="file" class="form-control" id="inputGroupFile02">
+        <input type="file" class="form-control" id="inputGroupFile02" @change="getFiles($event)"/>
         <label class="input-group-text" for="inputGroupFile02">Upload</label>
         </div>
-      <button type="button" class="btn btn-success">提交</button>
+      <button class="btn btn-success" @click="fileflow()">提交</button>
     </div>
      <!-- 
         以下为model5
@@ -129,7 +129,7 @@ import $ from 'jquery';
       let model_change = ref(1);
       let showdata = ref(0);
       let indexname = ref('');
-      let cnt = 0;
+      let cnt = ref(0);
       let datas = [];
       let option = {
         series: [
@@ -170,6 +170,7 @@ import $ from 'jquery';
           });
       }
       const showflow = (index) => {
+        cnt.value = 0;
         $.ajax({
               url: "http://127.0.0.1:5000/get/switch/" + index,
               type: "GET",
@@ -177,10 +178,10 @@ import $ from 'jquery';
               success: function (data) {
                 console.log(data);
                 for(let i in data){
-                  datas[i] = data[i];
+                  datas[i - 1] = data[i];
+                  cnt.value += 1;
                 }
 
-                // console.log(datas[0]);
               },
               error: function (text) {
                   console.log(text);
@@ -191,8 +192,35 @@ import $ from 'jquery';
         showdata.value = 1;
         
       }
+      var flow_json2 = {};
+      const getFiles = (e) => {
+          let reader = new FileReader();
+          // var flow_json = {};
+          reader.readAsBinaryString(e.target.files[0])
+          reader.onload = ev => {
+            console.log(ev.target.result);
+            flow_json2 = ev.target.result;
+        }
+      }
+      const fileflow = () => {
+        $.ajax({
+              url: "http://127.0.0.1:5000/add/flow",
+              type: "POST",
+              data: JSON.stringify(flow_json2),
+              dataType: "json",
+              async: false,
+              contentType: "application/json", //必须这样写POST   还要加JSON.stringify()    
+              success: function (data) {
+                  console.log(data);
+              },
+              error: function (text) {
+                  console.log(text);
+              }
+          });
+      }
+
       const addflow = () => {
-        var  flow_json = {
+        var flow_json = {
           'switchname':switchname.value,
           'priority':priority.value,
           'match':match.value,
@@ -210,9 +238,12 @@ import $ from 'jquery';
               },
               error: function (text) {
                   console.log(text);
-                  return;
               }
           });
+        switchname.value = '';
+        priority.value = '';
+        match.value = '';
+        actions.value = '';
       }
       onMounted(() => {
         let myChart1 = echarts.init(document.getElementById("main"));
@@ -221,7 +252,6 @@ import $ from 'jquery';
       })
       const modelchange = (index) =>{
         model_change.value = index;
-        console.log(model_change.value);
       }
       return{
         switchname,
@@ -238,7 +268,36 @@ import $ from 'jquery';
         back,
         cnt,
         deleteflow,
+        getFiles,
+        fileflow
       }
+    },
+    methods: {
+      // getFiles(e){
+      //     console.info(e.target.files[0]);
+      //     let reader = new FileReader();
+      //     var flow_json = {};
+      //     reader.readAsBinaryString(e.target.files[0])
+      //     reader.onload = ev => {
+      //       console.log(ev.target.result);
+      //       flow_json = ev.target.result;
+      //       $.ajax({
+      //         url: "http://127.0.0.1:5000/add/flow",
+      //         type: "POST",
+      //         data: JSON.stringify(flow_json),
+      //         dataType: "json",
+      //         async: false,
+      //         contentType: "application/json", //必须这样写POST   还要加JSON.stringify()    
+      //         success: function (data) {
+      //             console.log(data);
+      //         },
+      //         error: function (text) {
+      //             console.log(text);
+      //         }
+      //     });
+      //     }
+
+      // }
     }
   }
 </script>
