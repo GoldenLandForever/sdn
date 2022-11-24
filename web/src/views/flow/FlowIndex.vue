@@ -50,7 +50,7 @@
           <div class="indexname">{{indexname}}中有{{cnt}}条流表</div>
           <div style="width: 700px;height: 200px;overflow-x:hidden;">
           <div v-for="(data,index) in datas" :key="data">
-            <div class="flow_title">第{{index + 1}}条流表</div>
+            <div v-if="data != null" class="flow_title">第{{index}}条流表</div>
             <div class="flow_content">{{data}}</div>
           </div>            
         </div>
@@ -170,13 +170,15 @@ import $ from 'jquery';
           });
       }
       const showflow = (index) => {
+        for (var key in datas) {
+	        datas[key] = null;
+        }
         cnt.value = 0;
         $.ajax({
               url: "http://127.0.0.1:5000/get/switch/" + index,
               type: "GET",
               async: false,
               success: function (data) {
-                console.log(data);
                 for(let i in data){
                   datas[i - 1] = data[i];
                   cnt.value += 1;
@@ -190,7 +192,6 @@ import $ from 'jquery';
           });
         indexname.value = index;
         showdata.value = 1;
-        
       }
       var flow_json2 = {};
       const getFiles = (e) => {
@@ -251,6 +252,7 @@ import $ from 'jquery';
   
       })
       const modelchange = (index) =>{
+        
         model_change.value = index;
       }
       return{
