@@ -504,6 +504,14 @@ import $ from 'jquery';
         });
         
         switchname.value = '';
+        let switch_temp = [];
+        let cntt = 0;
+        for(let i in store.state.topo.switchname){
+          if(store.state.topo.switchname[i] == "") continue;
+          switch_temp[cntt] = store.state.topo.switchname[i];
+          cntt ++;
+        }
+        store.state.topo.switchname = switch_temp;
       }
 
       const addLink = () => {

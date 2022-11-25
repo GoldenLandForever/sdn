@@ -253,7 +253,7 @@ import $ from 'jquery';
       onMounted(() => {
         let myChart1 = echarts.init(document.getElementById("main"));
         myChart1.setOption(option);
-  
+        
       })
       const modelchange = (index) =>{
         
